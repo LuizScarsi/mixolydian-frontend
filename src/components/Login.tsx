@@ -21,7 +21,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
     try {
       if (mode === "login") {
         const res = await api.post("/auth/login", { email, password });
-        login(res.data.token, res.data.name, res.data.role);
+        login(res.data.token, res.data.role, res.data.name);
         onLogin();
       } else {
         await api.post("/user", {

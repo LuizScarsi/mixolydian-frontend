@@ -1,5 +1,17 @@
 export const menuOptions = [
-  { label: "Musicas", route: "music" },
-  { label: "Playlists", route: "playlist" },
-  { label: "Usuários", route: "user" }
+  {
+    label: "🎵 Músicas",
+    route: "music",
+    roles: ["admin", "user"],
+  },
+  {
+    label: "📀 Playlists",
+    route: "playlist",
+    roles: ["admin", "user"],
+  },
+  {
+    label: "👤 Usuários",
+    route: "user",
+    roles: ["admin"],
+  },
 ];
