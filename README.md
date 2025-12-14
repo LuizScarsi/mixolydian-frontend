@@ -1,73 +1,183 @@
-# React + TypeScript + Vite
+# Trabalho final programação 2 — Relatório Técnico
+- **Projeto:** Mixolydian — Sistema de Gerenciamento de Músicas e Playlists  
+- **Disciplina:** Programação II  
+- **Aluno:** Luiz Scarsi e Otávio Rebelatto 
+- **Instituição:** UFFS  
+- **Ano/Semestre:** 2025-2  
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Currently, two official plugins are available:
+## Descrição Geral do Projeto
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+O projeto **Mixolydian** consiste em uma aplicação web full stack para gerenciamento de usuários, músicas, playlists e avaliações (ratings).  
+O sistema possui **autenticação**, **controle de permissões**, **relacionamentos complexos entre entidades** e um **dashboard analítico exclusivo para administradores**.
 
-## React Compiler
+A aplicação foi desenvolvida utilizando **Node.js + Express + Sequelize** no backend e **React + TypeScript** no frontend, com banco de dados **PostgreSQL**.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Arquitetura da Aplicação
 
-## Expanding the ESLint configuration
+A aplicação foi dividida em duas camadas principais:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Backend
+- Node.js
+- Express
+- Sequelize (ORM)
+- PostgreSQL
+- JWT para autenticação
+- Arquitetura em camadas:
+  - **Models**
+  - **Repositories**
+  - **Services**
+  - **Controllers**
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Frontend
+- React
+- TypeScript
+- Axios
+- Context API para autenticação
+- Componentização reutilizável
+- Controle de rotas por estado (sem react-router)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Modelagem do Banco de Dados
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+O banco de dados foi modelado com foco em **normalização** e **relacionamentos N:N**, utilizando tabelas de associação.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Principais tabelas:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- **users**
+- **musics**
+- **playlists**
+- **ratings**
+- **user_playlist** (relação usuário ↔ playlist)
+- **playlist_music** (relação playlist ↔ música)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Destaques da modelagem:
+
+- Uma playlist pode conter várias músicas (N:N)
+- Um usuário pode ter várias playlists (N:N)
+- Cada avaliação (`rating`) pertence a **um usuário e uma playlist**
+- Restrição `UNIQUE (id_user, id_playlist)` para evitar avaliações duplicadas
+
+## Autenticação e Autorização
+
+A autenticação foi implementada com **JWT (JSON Web Token)**.
+
+### Fluxo:
+1. Usuário faz login
+2. Backend retorna token JWT
+3. Token é armazenado no `localStorage`
+4. Frontend decodifica o token para obter:
+   - `id`
+   - `name`
+   - `role` (admin ou user)
+
+Essas informações são gerenciadas globalmente via **AuthContext**.
+
+---
+
+## Controle de Permissões
+
+Foram implementadas regras claras de permissão:
+
+### Usuário comum (`user`)
+- Pode visualizar músicas e playlists
+- Pode **editar e excluir apenas suas próprias playlists**
+- Pode avaliar playlists
+- **Não pode acessar o dashboard**
+- **Não pode excluir a própria conta**
+
+### Administrador (`admin`)
+- Pode gerenciar usuários, músicas e playlists
+- Pode editar e excluir qualquer playlist
+- Pode acessar o **Dashboard**
+- Não pode excluir a própria conta (regra de segurança)
+
+Essas regras são aplicadas:
+- **No frontend** (UI/UX)
+- **No backend** (validação real)
+
+---
+
+## Sistema de Avaliações (Ratings)
+
+O sistema de avaliações permite:
+- Avaliar playlists de 1 a 5 estrelas
+- Cada usuário pode avaliar uma playlist apenas uma vez
+- Cálculo da média de avaliações por playlist
+- Exibição dinâmica das avaliações
+
+A média e os ratings são carregados sempre que o usuário acessa a tela de playlists.
+
+---
+
+## Dashboard Administrativo
+
+O dashboard é acessível **exclusivamente para administradores** e apresenta:
+
+- Quantidade total de:
+  - Usuários
+  - Músicas
+  - Playlists
+  - Avaliações
+- Atualização dinâmica dos dados via API
+- Visão geral do sistema para tomada de decisões
+
+---
+
+## Decisões de Implementação
+
+### Uso de tabelas de associação
+Optou-se por tabelas intermediárias (`user_playlist`, `playlist_music`) para manter flexibilidade e boa normalização.
+
+### Context API para autenticação
+Facilitou o compartilhamento de dados do usuário logado entre componentes sem prop drilling.
+
+### Controle de permissões no frontend e backend
+Evita problemas de segurança e melhora a experiência do usuário.
+
+### Mapeamento manual antes de enviar dados ao frontend
+Os dados retornados pelo Sequelize são transformados em objetos simples, evitando acoplamento excessivo ao ORM.
+
+---
+
+## Dificuldades Encontradas
+
+- Gerenciamento correto de **aliases do Sequelize** (`as`)
+- Sincronização entre estado do frontend e dados do backend
+- Garantir que playlists sempre tenham dono
+- Evitar que administradores removam a própria conta
+
+---
+
+## Facilidades
+
+- Sequelize facilitou a manipulação de relacionamentos complexos
+- React permitiu componentização clara e reutilizável
+- JWT simplificou o controle de autenticação
+- Uso de seed facilitou testes e desenvolvimento
+
+---
+
+## Conclusão
+
+O projeto foi ótimo para reforçar os aprendizados em aula, revisar conteúdos e colocar tudo em prática. Atendeu a todos os requisitos propostos, incluindo autenticação, controle de permissões, CRUD completo, sistema de avaliações e dashboard administrativo.
+
+Durante o desenvolvimento foi possível aplicar conceitos importantes de:
+- Modelagem de dados
+- Segurança
+- Arquitetura de software
+- Programação full stack
+
+
+## Link do Repositório
+
+Backend:
+- https://github.com/LuizScarsi/mixolydian
+Frontend:
+- https://github.com/LuizScarsi/mixolydian-frontend
+
+## Como rodar:
+- Backend:
+    - `docker compose up`
+    - `nodemon server.js`
+- Frontend:
+    - `npm run dev`
