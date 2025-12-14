@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { api } from "./services/api";
+import { useAuth } from "./contexts/AuthContext.tsx";
 
 import OptionsMenu from "./components/OptionsMenu";
 import Loading from "./components/Loading";
@@ -64,10 +65,13 @@ export default function App() {
     return <Login onLogin={() => setIsAuth(true)} />;
   }
 
-  // 🚀 SE ESTÁ LOGADO → MOSTRA DASHBOARD
+  const { name, role } = useAuth();
   return (
     <div className="d-flex justify-content-center align-items-center w-100 min-vh-100">
       <div className="content-wrapper text-center">
+        <p>
+          Logado como: <strong>{name}</strong> ({role})
+        </p>
         
         <h1 className="mb-4">Escolha uma opção:</h1>
 
@@ -81,6 +85,7 @@ export default function App() {
 
         {data && (
           <CrudContainer
+            key={route}
             route={route}
             data={data}
             getAll={() => getAll(route)}

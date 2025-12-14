@@ -50,41 +50,6 @@ export default function CrudContainer({ route, data, getAll }: Props) {
     alert(errorMessage); 
   };
 
-  // const save = async (record: any) => {
-  //   try {
-  //     if (route === "playlist") {
-  //       if (mode === "edit") {
-  //         // 🟡 EDITAR PLAYLIST
-  //         await api.put(`/playlist/${editing.id}`, {
-  //           ...record,
-  //           musicIds: selectedMusics,
-  //         });
-  //       } else {
-  //         // 🟢 CRIAR PLAYLIST
-  //         await api.post("/playlist", {
-  //           ...record,
-  //           musicIds: selectedMusics,
-  //         });
-  //       }
-  //     } 
-  //     else if (mode === "edit") {
-  //       if (route === "matricula") {
-  //         await api.put(`/matricula/${editing.id_aluno}/${editing.id_curso}`, record);
-  //       } else {
-  //         await api.put(`/${route}/${record.id}`, record);
-  //       }
-  //     } else {
-  //       await api.post(`/${route}`, record);
-  //     }
-
-  //     setShowForm(false);
-  //     setEditing(null);
-  //     setSelectedMusics([]);
-  //     getAll();
-  //   } catch (err) {
-  //     handleApiError(err);
-  //   }
-  // };
   const save = async (record: any) => {
     try {
       if (route === "playlist") {
@@ -106,18 +71,8 @@ export default function CrudContainer({ route, data, getAll }: Props) {
             musicIds: selectedMusics,
           });
         }
-
       } else if (mode === "edit") {
-
-        if (route === "matricula") {
-          await api.put(
-            `/matricula/${editing.id_aluno}/${editing.id_curso}`,
-            record
-          );
-        } else {
-          await api.put(`/${route}/${record.id}`, record);
-        }
-
+        await api.put(`/${route}/${record.id}`, record);
       } else {
         await api.post(`/${route}`, record);
       }
@@ -150,10 +105,9 @@ export default function CrudContainer({ route, data, getAll }: Props) {
     }
   };
 
-
   return (
     <div className="mt-4">
-
+      
       {!showForm && (
         <button
           className="btn btn-success mb-3"
@@ -200,6 +154,7 @@ export default function CrudContainer({ route, data, getAll }: Props) {
       ) : (
         <DataCards
           data={data}
+          route={route}
           onEdit={(item: any) => {
             setEditing(item);
             setMode("edit");
