@@ -30,12 +30,6 @@ export default function App() {
       let result = raw;
 
       if (r === "playlist") {
-        // const playlists = raw.playlists ?? [];
-        // result = playlists.map((p: any) => ({
-        //   id: p.id,
-        //   name: p.name,
-        //   description: p.description,
-        // }));
         result = raw.playlists ?? raw;
       } 
       else if (r === "music") {
